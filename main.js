@@ -1,92 +1,117 @@
-// Ambil elemen penting
-const historyDisplay = document.querySelector('.output h3');
-const resultDisplay = document.querySelector('.output h2');
+// Ambil elemen display
+const previewDisplay = document.querySelector('.output h3'); // PREVIEW
+const resultDisplay = document.querySelector('.output h2');  // HASIL
+const historyList = document.querySelector('.history-list'); // HISTORY
 const buttons = document.querySelectorAll('.btn');
 
-let currentInput = ''; // Menyimpan input pengguna
-let history = ''; // Menyimpan riwayat perhitungan
+// State
+let currentInput = '';
+let histories = [];
 
-// Fungsi utama untuk update tampilan
-function updateDisplay() {
-    resultDisplay.textContent = currentInput || '';
-    historyDisplay.textContent = currentInput || '0';
+// Ambil nilai tombol (support <h3> & icon)
+function getButtonValue(button) {
+    const h3 = button.querySelector('h3');
+    if (h3) return h3.textContent.trim();
+    if (button.querySelector('i')) return 'BACK';
+    return '';
 }
 
-// Fungsi untuk evaluasi ekspresi
+// Update preview & hasil
+function updateDisplay() {
+    previewDisplay.textContent = currentInput;
+    resultDisplay.textContent = currentInput || '0';
+}
+
+// Hitung & simpan history
 function calculate() {
+    if (!currentInput) return;
+
     try {
-        let expression = currentInput.replace(/x/g, '*').replace(/,/g, '.');
-        expression = expression.replace(/%/g, '/100');
+        const expression = currentInput
+            .replace(/x/g, '*')
+            .replace(/,/g, '.')
+            .replace(/%/g, '/100');
+
         const result = eval(expression);
-        history = currentInput;
+
+        // Tambah ke history
+        const li = document.createElement('li');
+        li.textContent = `${currentInput} = ${result}`;
+        historyList.prepend(li); // tampilkan di atas
+
+        histories.push(`${currentInput} = ${result}`); // simpan ke array juga
+
+        // Tampilkan hasil
         resultDisplay.textContent = result;
-        historyDisplay.textContent = history;
+
+        // Kosongkan preview
+        previewDisplay.textContent = '';
+
+        // Input jadi hasil
         currentInput = result.toString();
+
     } catch {
         resultDisplay.textContent = 'Error';
     }
 }
 
-// Event listener untuk tombol kalkulator
+// Event klik tombol
 buttons.forEach(button => {
     button.addEventListener('click', () => {
-        const value = button.textContent.trim();
+        const value = getButtonValue(button);
 
-        // Tombol AC → reset semua
+        // AC
         if (value === 'AC') {
             currentInput = '';
-            history = '';
-            resultDisplay.textContent = '';
-            historyDisplay.textContent = '0';
+            histories = [];
+            previewDisplay.textContent = '';
+            resultDisplay.textContent = '0';
+            historyList.innerHTML = ''; // hapus semua history di layar
+            return;
         }
 
-        // Tombol hapus (ikon panah kiri)
-        else if (button.querySelector('i')) {
+        // Backspace
+        if (value === 'BACK') {
             currentInput = currentInput.slice(0, -1);
             updateDisplay();
+            return;
         }
 
-        // Tombol sama dengan (=)
-        else if (value === '=') {
+        // Sama dengan
+        if (value === '=') {
             calculate();
+            return;
         }
 
-        // Tambahkan input biasa
-        else {
-            currentInput += value;
-            updateDisplay();
-        }
+        // Input biasa
+        currentInput += value;
+        updateDisplay();
     });
 });
 
-// ==== Keyboard Shortcuts ====
-
-// Event keyboard global
+// ===== Keyboard Support =====
 document.addEventListener('keydown', (e) => {
     const key = e.key;
 
-    // Angka, operator dasar, koma
     if (/[0-9+\-*/%,.]/.test(key)) {
-        currentInput += key === '*' ? 'x' : key; // ubah * jadi x biar konsisten
+        currentInput += key === '*' ? 'x' : key;
         updateDisplay();
     }
 
-    // Backspace → hapus satu angka
     else if (key === 'Backspace') {
         currentInput = currentInput.slice(0, -1);
         updateDisplay();
     }
 
-    // Enter atau = → hitung
     else if (key === 'Enter' || key === '=') {
         calculate();
     }
 
-    // Escape → reset semua
     else if (key === 'Escape') {
         currentInput = '';
-        history = '';
-        resultDisplay.textContent = '';
-        historyDisplay.textContent = '0';
+        histories = [];
+        previewDisplay.textContent = '';
+        resultDisplay.textContent = '0';
+        historyList.innerHTML = '';
     }
 });

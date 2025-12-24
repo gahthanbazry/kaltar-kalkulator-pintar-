@@ -2,6 +2,7 @@
 *{
     margin: 0;
     padding: 0;
+    color: black;
     font-weight: 400;
     box-sizing: border-box;
     font-family: "poppins";
@@ -126,4 +127,27 @@ body{
     font-weight: 550;
     color: #ffffff;
     font-size: 27px;
+}
+.main-history{
+    width: 100%;
+    height: 32em;
+    display: flex;
+    max-width: 16em;
+    border-radius: 20px;
+    margin: 10px 10px;
+    background: #1c1c1c;
+}
+.history {
+    margin: 10px 15px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.history h4{
+    margin-top: 10px;
+}
+.history h4, ul li{
+    color: white;
+}
+.history ul li{
+    margin-top: 20px;
 }
